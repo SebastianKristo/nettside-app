@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="16dp" android:background="@drawable/widget_bg_asym"
+    android:backgroundTint="#FFB68A">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="kristo.no" android:textColor="#331200" android:textSize="13sp" android:textStyle="bold" />
+    <Space android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="12,4k" android:textColor="#331200" android:textSize="44sp" android:textStyle="bold" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="besøk siste 24t" android:textColor="#331200" android:textSize="13sp" />
+</LinearLayout>

@@ -1,4 +1,6 @@
-# Cloudflare Analytics (Android + iOS)
+# Edgepuls – Cloudflare Analytics (Android + iOS)
+
+*Trafikk og ytelse for dine Cloudflare-domener.*
 
 Native apper som viser Cloudflare-analyse for ett eller flere domener.
 
@@ -64,3 +66,9 @@ open CloudflareAnalytics.xcodeproj
 
 Legg inn din Team ID i `ios/project.yml` (`DEVELOPMENT_TEAM`) én gang – da overlever den `xcodegen generate` – og kjør på telefonen (gratis Apple-ID gir 7-dagers signering).
 GitHub Actions bygger også en usignert `CloudflareAnalytics-unsigned.ipa` (artefakt `ios-unsigned-ipa`) som kan sideloades med Sideloadly eller AltStore, som signerer den med din Apple-ID.
+
+## Widgets
+
+**iOS** (WidgetKit, target `EdgepulsWidget`): «Besøk» (liten: besøk + sparkline, medium: besøk, endring mot i går og 2×2-rutenett) og «Toppland» (liten). Hold inne widgeten → *Rediger widget* for å velge domene. Appen og widgeten deler domener og cache via App Group `group.no.kristo.edgepuls`, og tokenet via en delt Keychain-gruppe.
+
+**Android** (Jetpack Glance): «Besøk» (2×2, bredere = oversikt med 7 dager og refresh-knapp) og «Cache-treff» (2×2 sirkel). Domenet velges når widgeten legges til. Widgetene tegnes på nytt etter hver oppdatering (hvert 30. min) og viser siste cache med «Oppdatert hh:mm» hvis den er gammel.
