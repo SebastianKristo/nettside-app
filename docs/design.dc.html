@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,300..700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,400,0..1&amp;display=block" rel="stylesheet"><style>body{margin:0;background:#0b0a0d;font-family:'Roboto Flex',system-ui,sans-serif;color:#e6e0e9}a{color:#ffb1c8}a:hover{color:#ffd9e2}*::-webkit-scrollbar{display:none}@keyframes spin{to{transform:rotate(360deg)}}</style></helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;box-sizing:border-box">
+<div style="width:412px;height:892px;background:#141218;border-radius:40px;border:8px solid #2a2830;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:36px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:14px;font-weight:500">
+    <span>22:14</span>
+    <div style="width:22px;height:22px;border-radius:50%;background:#000"></div>
+    <div style="display:flex;gap:4px;font-family:'Material Symbols Rounded';font-size:17px"><span>signal_cellular_alt</span><span>wifi</span><span>battery_5_bar</span></div>
+  </div>
+  <div style="height:64px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px 0 12px;position:relative">
+    <button onClick="{{ toggleMenu }}" style="display:flex;align-items:center;gap:8px;height:40px;padding:0 12px 0 10px;border:none;border-radius:20px;background:#36343b;color:#e6e0e9;font:500 15px 'Roboto Flex';cursor:pointer">
+      <span style="font-family:'Material Symbols Rounded';font-size:20px;color:#ffb1c8">language</span>{{ domain }}<span style="font-family:'Material Symbols Rounded';font-size:20px">arrow_drop_down</span>
+    </button>
+    <div style="flex:1"></div>
+    <button onClick="{{ refresh }}" style="width:48px;height:48px;border:none;border-radius:24px;background:transparent;color:#cac4d0;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#2b2930"><span style="font-family:'Material Symbols Rounded';font-size:24px;animation:{{ spinAnim }}">refresh</span></button>
+    <button style="width:48px;height:48px;border:none;border-radius:24px;background:transparent;color:#cac4d0;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#2b2930"><span style="font-family:'Material Symbols Rounded';font-size:24px">settings</span></button>
+    <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;top:56px;left:12px;z-index:20;min-width:240px;background:#2b2930;border-radius:8px;padding:8px 0;box-shadow:0 4px 16px rgba(0,0,0,.5)">
+        <sc-for list="{{ domains }}" as="d" hint-placeholder-count="3">
+          <div onClick="{{ d.pick }}" style="height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:14px;cursor:pointer;background:{{ d.bg }}" style-hover="background:#36343b"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:#cac4d0">{{ d.icon }}</span>{{ d.name }}</div>
+        </sc-for>
+        <div style="height:1px;background:#49454f;margin:8px 0"></div>
+        <div onClick="{{ openAdd }}" style="height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:14px;cursor:pointer" style-hover="background:#36343b"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:#ffb1c8">add</span>Legg til domene</div>
+      </div>
+    </sc-if>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0 16px 24px">
+    <div style="background:#2b2930;border-radius:28px;overflow:hidden;margin-top:4px">
+      <div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cac4d0"><span style="width:8px;height:8px;border-radius:4px;background:#8fd6a0"></span>Live · siste 24 timer</div>
+        <div style="display:flex;align-items:baseline;gap:20px;margin-top:4px">
+          <div style="display:flex;flex-direction:column"><span style="font-size:57px;line-height:64px;font-weight:350;letter-spacing:-1px">{{ hero.visits }}</span><span style="font-size:12px;color:#cac4d0">besøk</span></div>
+          <div style="display:flex;flex-direction:column"><span style="font-size:24px;font-weight:450">{{ hero.req }}</span><span style="font-size:12px;color:#cac4d0">forespørsler</span></div>
+          <div style="display:flex;flex-direction:column"><span style="font-size:24px;font-weight:450">{{ hero.mb }}</span><span style="font-size:12px;color:#cac4d0">MB</span></div>
+        </div>
+      </div>
+      <svg viewBox="0 0 300 60" preserveAspectRatio="none" style="display:block;width:100%;height:72px;margin-top:8px"><path d="{{ sparkArea }}" fill="rgba(255,177,200,.18)"></path><path d="{{ sparkLine }}" fill="none" stroke="#ffb1c8" stroke-width="1.5" vector-effect="non-scaling-stroke"></path></svg>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:22px;font-weight:450">{{ tabTitle }}</span>
+        <div style="display:flex;border:1px solid #938f99;border-radius:16px;overflow:hidden;height:32px">
+          <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="2">
+            <button onClick="{{ r.pick }}" style="border:none;padding:0 12px;background:{{ r.bg }};color:#e6e0e9;font:500 13px 'Roboto Flex';cursor:pointer;display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:16px;display:{{ r.check }}">check</span>{{ r.name }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+          <div onClick="{{ s.open }}" style="background:#211f26;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer" style-hover="background:#2b2930">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#cac4d0"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:{{ s.color }}">{{ s.icon }}</span><span style="flex:1">{{ s.label }}</span><span style="font-family:'Material Symbols Rounded';font-size:16px">chevron_right</span></div>
+            <div style="display:flex;align-items:baseline;gap:4px"><span style="font-size:32px;font-weight:400;line-height:36px">{{ s.value }}</span><span style="font-size:12px;color:#cac4d0">{{ s.unit }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ progress }}" as="p" hint-placeholder-count="0">
+        <div style="background:#211f26;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span>{{ p.label }}</span><span style="font-weight:500">{{ p.value }} %</span></div>
+          <div style="height:4px;border-radius:2px;background:#49454f;display:flex;gap:4px"><span style="width:{{ p.w }};background:{{ p.color }};border-radius:2px"></span></div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ showMap }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#211f26;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:16px;font-weight:500">Besøk per land</span><span style="font-size:12px;color:#cac4d0">Trykk på et land</span></div>
+          <div style="position:relative;width:100%;aspect-ratio:64/26">
+            <img src="{{ mapSrc }}" style="position:absolute;inset:0;width:100%;height:100%"></img>
+            <sc-for list="{{ countries }}" as="c" hint-placeholder-count="5">
+              <div onClick="{{ c.pick }}" style="position:absolute;left:{{ c.x }};top:{{ c.y }};width:{{ c.size }};height:{{ c.size }};transform:translate(-50%,-50%);border-radius:50%;background:{{ c.fill }};border:2px solid #ffb1c8;cursor:pointer;box-sizing:border-box"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#2b2930;border-radius:12px;padding:10px 14px">
+            <span style="font-family:'Material Symbols Rounded';font-size:22px;color:#ffb1c8">location_on</span>
+            <div style="flex:1;display:flex;flex-direction:column"><span style="font-size:14px;font-weight:500">{{ sel.name }}</span><span style="font-size:12px;color:#cac4d0">{{ sel.share }} av all trafikk</span></div>
+            <span style="font-size:22px">{{ sel.v }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+            <sc-for list="{{ countries }}" as="c" hint-placeholder-count="5">
+              <div onClick="{{ c.pick }}" style="display:grid;grid-template-columns:32px 1fr 48px;align-items:center;gap:12px;font-size:13px;cursor:pointer"><span style="color:#cac4d0">{{ c.code }}</span><div style="height:6px;border-radius:3px;background:#36343b"><div style="height:6px;border-radius:3px;width:{{ c.w }};background:#a0cafd"></div></div><span style="text-align:right">{{ c.vs }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#211f26;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:16px;font-weight:500;margin-bottom:4px">Mest besøkte sider</span>
+          <sc-for list="{{ pages }}" as="p" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:96px 1fr 40px;align-items:center;gap:12px;font-size:13px"><span style="font-family:ui-monospace,monospace;color:#cac4d0">{{ p.path }}</span><div style="height:6px;border-radius:3px;background:#36343b"><div style="height:6px;border-radius:3px;min-width:6px;width:{{ p.w }};background:#ffb1c8"></div></div><span style="text-align:right">{{ p.v }}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px"><span style="font-size:22px;font-weight:450">Historikk</span></div>
+      <div style="display:flex;border:1px solid #938f99;border-radius:20px;overflow:hidden;height:40px">
+        <sc-for list="{{ periods }}" as="r" hint-placeholder-count="4">
+          <button onClick="{{ r.pick }}" style="flex:1;border:none;border-right:1px solid #49454f;background:{{ r.bg }};color:#e6e0e9;font:500 14px 'Roboto Flex';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:18px;display:{{ r.check }}">check</span>{{ r.name }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ charts }}" as="ch" hint-placeholder-count="2">
+        <div style="background:#211f26;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;color:#cac4d0">{{ ch.label }}</span><span><span style="font-size:24px">{{ ch.total }}</span> <span style="font-size:12px;color:#cac4d0">{{ ch.unit }}</span></span></div>
+          <div style="height:88px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid #49454f">
+            <sc-for list="{{ ch.bars }}" as="b" hint-placeholder-count="30">
+              <div style="flex:1;height:{{ b.h }};background:{{ b.c }};border-radius:3px 3px 0 0"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#938f99"><span>{{ ch.first }}</span><span>{{ ch.avg }}</span><span>I dag</span></div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#5c1a1a;color:#ffdad6;border-radius:16px;padding:14px 16px;display:flex;gap:12px;font-size:13px;line-height:18px"><span style="font-family:'Material Symbols Rounded';font-size:20px">error</span><span>Feil i spørring: zonen har ikke tilgang til «Stoppede forespørsler». Sjekk API-tilgangen i Cloudflare.</span></div>
+      </sc-if>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#938f99;margin-top:4px"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:#8fd6a0">check_circle</span>{{ footer }}</div>
+    </div>
+  </div>
+  <sc-if value="{{ det }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDet }}" style="position:absolute;inset:0;z-index:25;background:rgba(0,0,0,.5)"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:26;background:#211f26;border-radius:28px 28px 0 0;padding:12px 20px 32px;display:flex;flex-direction:column;gap:16px">
+      <div style="width:32px;height:4px;border-radius:2px;background:#938f99;align-self:center"></div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;border-radius:20px;background:#36343b;display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:22px;color:{{ det.color }}">{{ det.icon }}</span><div style="flex:1;display:flex;flex-direction:column"><span style="font-size:18px">{{ det.label }}</span><span style="font-size:12px;color:#cac4d0">{{ domain }}</span></div><button onClick="{{ closeDet }}" style="width:40px;height:40px;border:none;border-radius:20px;background:transparent;color:#cac4d0;cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px">close</button></div>
+      <div style="display:flex;border:1px solid #938f99;border-radius:20px;overflow:hidden;height:40px">
+        <sc-for list="{{ periods }}" as="r" hint-placeholder-count="4">
+          <button onClick="{{ r.pick }}" style="flex:1;border:none;border-right:1px solid #49454f;background:{{ r.bg }};color:#e6e0e9;font:500 14px 'Roboto Flex';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:18px;display:{{ r.check }}">check</span>{{ r.name }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:45px;font-weight:350">{{ det.chart.total }}</span><span style="font-size:14px;color:#cac4d0">{{ det.unit }} totalt</span></div>
+      <div style="height:180px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid #49454f">
+        <sc-for list="{{ det.chart.bars }}" as="b" hint-placeholder-count="30"><div style="flex:1;height:{{ b.h }};background:{{ b.c }};border-radius:3px 3px 0 0"></div></sc-for>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#938f99;margin-top:-8px"><span>{{ det.chart.first }}</span><span>I dag</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <sc-for list="{{ det.facts }}" as="x" hint-placeholder-count="3"><div style="background:#2b2930;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;color:#cac4d0">{{ x.k }}</span><span style="font-size:18px">{{ x.v }}</span></div></sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:100%;background:#2b2930;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:16px">
+        <span style="font-family:'Material Symbols Rounded';font-size:24px;color:#ffb1c8;align-self:center">add_link</span>
+        <div style="font-size:24px;text-align:center">Legg til domene</div>
+        <div style="font-size:14px;color:#cac4d0;line-height:20px">Hvert domene bruker sin egen Cloudflare API-token med tilgang til Analytics (lesetilgang).</div>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#cac4d0">Domene<input value="{{ fDomain }}" onChange="{{ setDomain }}" placeholder="eksempel.no" style="height:52px;border:1px solid #938f99;border-radius:4px;background:transparent;color:#e6e0e9;padding:0 14px;font:16px 'Roboto Flex';outline-color:#ffb1c8"></input></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#cac4d0">Zone ID<input value="{{ fZone }}" onChange="{{ setZone }}" placeholder="023bac12…" style="height:52px;border:1px solid #938f99;border-radius:4px;background:transparent;color:#e6e0e9;padding:0 14px;font:16px ui-monospace,monospace;outline-color:#ffb1c8"></input></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#cac4d0">API-token<input type="password" value="{{ fToken }}" onChange="{{ setToken }}" placeholder="••••••••" style="height:52px;border:1px solid #938f99;border-radius:4px;background:transparent;color:#e6e0e9;padding:0 14px;font:16px ui-monospace,monospace;outline-color:#ffb1c8"></input></label>
+        <sc-if value="{{ fErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#ffb4ab">{{ fErr }}</div></sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button onClick="{{ closeAdd }}" style="height:40px;padding:0 16px;border:none;border-radius:20px;background:transparent;color:#ffb1c8;font:500 14px 'Roboto Flex';cursor:pointer">Avbryt</button>
+          <button onClick="{{ saveAdd }}" style="height:40px;padding:0 24px;border:none;border-radius:20px;background:#ffb1c8;color:#5e1133;font:500 14px 'Roboto Flex';cursor:pointer">Legg til</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ snack }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:16px;right:16px;bottom:32px;background:#e6e0e9;color:#322f35;border-radius:4px;padding:14px 16px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.4)">{{ snackText }}</div>
+  </sc-if>
+  <div style="height:80px;flex:none;display:flex;background:#211f26;padding-top:12px;box-sizing:border-box">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+      <button onClick="{{ t.pick }}" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:{{ t.color }};font:{{ t.weight }} 12px 'Roboto Flex'">
+        <span style="width:64px;height:32px;border-radius:16px;background:{{ t.pill }};display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:24px;color:{{ t.icolor }};font-variation-settings:'FILL' {{ t.fill }}">{{ t.icon }}</span>{{ t.name }}
+      </button>
+    </sc-for>
+  </div>
+  <div style="height:24px;flex:none;display:flex;align-items:center;justify-content:center;background:#211f26"><div style="width:108px;height:4px;border-radius:2px;background:#cac4d0"></div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const LAND=[[[14,20],[22,28],[50,56]],[[10,20],[22,29],[44,58]],[[3,20],[23,28],[33,36],[40,63]],[[2,19],[23,27],[32,36],[38,63]],[[5,8],[10,21],[31,32],[33,62]],[[9,23],[31,60]],[[10,24],[31,58]],[[11,22],[31,35],[36,57]],[[12,21],[31,55]],[[13,20],[29,54]],[[14,19],[29,53]],[[15,19],[29,40],[44,48],[49,52]],[[16,19],[29,40],[45,47],[49,52]],[[18,20],[28,41],[50,51]],[[18,23],[30,40],[50,53]],[[18,25],[33,39],[49,58]],[[18,26],[34,40],[52,58]],[[19,26],[34,39],[53,58]],[[20,25],[34,38],[39,40],[52,59]],[[20,24],[34,37],[39,39],[52,59]],[[20,23],[34,37],[52,59]],[[20,22],[35,36],[53,58]],[[20,22],[56,57],[61,62]],[[20,21],[61,61]],[[20,21]]];
+let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 26">';
+LAND.forEach((row,r)=>row.forEach(([a,b])=>{for(let c=a;c<=b;c++)svg+=`<circle cx="${c+.5}" cy="${r+.5}" r=".32" fill="#5b5763"/>`}));
+const MAP='data:image/svg+xml,'+encodeURIComponent(svg+'</svg>');
+const CTRY=[['US','USA',618,39,-98],['AU','Australia',546,-25,134],['KR','Sør-Korea',520,36,128],['FR','Frankrike',318,46,2],['NO','Norge',292,61,9]];
+const nf=(v,d=0)=>Number(v).toLocaleString('nb-NO',{minimumFractionDigits:d,maximumFractionDigits:d});
+const rnd=s=>()=>((s=Math.imul(s^s>>>15,1|s)+0x6d2b79f5|0)>>>0)%1000/1000;
+const DOMS=[['arildkristo.com',1],['foto.arildkristo.com',.42],['kristo.no',2.3]];
+const TABS=['Trafikk','Besøk','Ytelse','Sikkerhet'];
+const PER=[['7 d',7],['30 d',30],['90 d',45],['1 år',52]];
+class Component extends DCLogic {
+  state={detI:null,doms:DOMS,add:false,fDomain:'',fZone:'',fToken:'',fErr:'',snackText:'',tab:0,dom:0,range:0,per:1,menu:false,sel:0,spin:false,snack:false};
+  series(seed,n,base,vary){const r=rnd(seed);return Array.from({length:n},(_,i)=>Math.max(0,base*(1+Math.sin(i/2.3)*.25+(r()-.5)*vary)))}
+  chart(label,unit,color,seed,base,mode,d=0){
+    const n=PER[this.state.per][1],v=this.series(seed+this.state.per*7+this.state.dom*3,n,base,.8),mx=Math.max(...v);
+    const tot=mode==='max'?v[n-1]:v.reduce((a,b)=>a+b,0);
+    return{label,unit,total:nf(tot,d),first:['8.10.','16.9.','17.7.','okt. 25'][this.state.per],avg:mode==='max'?'maks '+nf(mx,d):'snitt '+nf(tot/n,d)+' / dag',
+      bars:v.map((x,i)=>({h:Math.max(2,x/mx*100)+'%',c:i===n-1?color:color+'b0'}))};
+  }
+  renderVals(){
+    const s=this.state,DOMS=s.doms,f=DOMS[s.dom][1]*(s.range?.62:1),k=v=>nf(v*f);
+    const r=rnd(11+s.dom),pts=Array.from({length:60},(_,i)=>30+Math.sin(i/4)*8+(r()-.5)*14);
+    const line=pts.map((y,i)=>(i?'L':'M')+(i*300/59).toFixed(1)+','+y.toFixed(1)).join('');
+    const tot=CTRY.reduce((a,c)=>a+c[2],0),ms=CTRY[0][2];
+    const countries=CTRY.map((c,i)=>({code:c[0],vs:k(c[2]),w:c[2]/ms*100+'%',x:(c[4]+180)/360*100+'%',y:(78-c[3])/138*100+'%',size:10+c[2]/ms*16+'px',fill:i===s.sel?'#ffb1c8':'rgba(255,177,200,.3)',pick:()=>this.setState({sel:i})}));
+    const sc=CTRY[s.sel];
+    const T=[
+      {stats:[['group','Besøk',k(164),'besøk','#ffb1c8'],['swap_vert','Forespørsler',k(3024),'','#a0cafd'],['cloud_download','Dataoverføring',nf(47.67*f,2),'MB','#f3bd6e'],['public','Land',nf(Math.round(23*DOMS[s.dom][1])),'','#8fd6a0']],
+       charts:[this.chart('Besøk','besøk','#ffb1c8',1,67*f),this.chart('Forespørsler','','#a0cafd',2,1144*f),this.chart('Dataoverføring','MB','#f3bd6e',3,8.9*f,'sum',2)]},
+      {stats:[['visibility','Sidevisninger',k(182),'visninger','#ffb1c8'],['person','Unike besøkende',k(355),'besøkende','#c9b6ff']],map:true,
+       charts:[this.chart('Sidevisninger','visninger','#ffb1c8',4,67*f),this.chart('Unike besøkende','besøkende','#c9b6ff',5,63*f)]},
+      {stats:[['timer','Svartid p50','17','ms','#8fd6a0'],['timer','Svartid p95','151','ms','#f3bd6e'],['warning','4xx-andel','57,08','%','#f3bd6e'],['dangerous','5xx-andel','0','%','#ffb4ab'],['bolt','Fra hurtiglager',k(310),'forespørsler','#8fd6a0'],['cloud_done','Data fra hurtiglager',nf(25.53*f,2),'MB','#a0cafd']],
+       progress:[['Treffrate',10.35,'#8fd6a0'],['Båndbredde spart',52.98,'#a0cafd']],
+       charts:[this.chart('Svartid p95','ms','#f3bd6e',6,110,'max'),this.chart('Hurtiglager-treffrate','%','#8fd6a0',7,6,'max',1)]},
+      {stats:[['dns','DNS-oppslag',k(2030),'oppslag','#a0cafd'],['shield','Stoppede',"–",'forespørsler','#ffb4ab']],progress:[['NXDOMAIN-andel',27.09,'#f3bd6e']],error:true,
+       charts:[this.chart('DNS-oppslag','oppslag','#a0cafd',8,549*f)]}
+    ][s.tab];
+    return{
+      domain:DOMS[s.dom][0],menuOpen:s.menu,toggleMenu:()=>this.setState({menu:!s.menu}),
+      domains:DOMS.map((d,i)=>({name:d[0],icon:i===s.dom?'check':'language',bg:i===s.dom?'#36343b':'transparent',pick:()=>this.setState({dom:i,menu:false})})),
+      spinAnim:s.spin?'spin .8s linear infinite':'none',
+      refresh:()=>{this.setState({spin:true});setTimeout(()=>this.setState({spin:false,snack:true,snackText:'Data oppdatert fra Cloudflare'}),900);setTimeout(()=>this.setState({snack:false}),3200)},
+      snack:s.snack,snackText:s.snackText,addOpen:s.add,fDomain:s.fDomain,fZone:s.fZone,fToken:s.fToken,fErr:s.fErr,
+      openAdd:()=>this.setState({add:true,menu:false,fDomain:'',fZone:'',fToken:'',fErr:''}),closeAdd:()=>this.setState({add:false}),
+      setDomain:e=>this.setState({fDomain:e.target.value}),setZone:e=>this.setState({fZone:e.target.value}),setToken:e=>this.setState({fToken:e.target.value}),
+      saveAdd:()=>{const d=s.fDomain.trim().toLowerCase();if(!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(d))return this.setState({fErr:'Ugyldig domenenavn'});if(s.fZone.trim().length<8)return this.setState({fErr:'Mangler Zone ID'});if(s.fToken.trim().length<8)return this.setState({fErr:'Mangler gyldig API-token'});
+        this.setState({doms:[...DOMS,[d,.3+Math.random()*2]],dom:DOMS.length,add:false,snack:true,snackText:d+' lagt til'});setTimeout(()=>this.setState({snack:false}),3000)},
+      hero:{visits:k(164),req:k(3024),mb:nf(47.67*f,0)},sparkLine:line,sparkArea:line+'L300,60L0,60Z',
+      tabs:TABS.map((t,i)=>({name:t,icon:['monitoring','group','speed','shield'][i],color:i===s.tab?'#e6e0e9':'#cac4d0',weight:i===s.tab?600:500,pill:i===s.tab?'#7b2949':'transparent',icolor:i===s.tab?'#ffd9e2':'#cac4d0',fill:i===s.tab?1:0,pick:()=>this.setState({tab:i,detI:null})})),
+      tabTitle:TABS[s.tab],
+      ranges:['Siste 24 t','I dag'].map((n,i)=>({name:n,bg:i===s.range?'#7b2949':'transparent',check:i===s.range?'inline':'none',pick:()=>this.setState({range:i})})),
+      periods:PER.map((p,i)=>({name:p[0],bg:i===s.per?'#7b2949':'transparent',check:i===s.per?'inline':'none',pick:()=>this.setState({per:i})})),
+      stats:T.stats.map(([icon,label,value,unit,color],i)=>({icon,label,value,unit,color,open:()=>this.setState({detI:i})})),
+      det:(()=>{const st=T.stats[s.detI];if(!st)return false;const num=parseFloat(String(st[2]).replace(/\s/g,'').replace(',','.'))||1;const pct=st[3]==='%'||st[3]==='ms';
+        const ch=this.chart(st[1],st[3],st[4],30+s.tab*9+s.detI,num*(pct?1:.9),pct?'max':'sum',num<100?1:0);
+        const v=this.series(30+s.tab*9+s.detI+s.per*7+s.dom*3,PER[s.per][1],num*(pct?1:.9),.8);const d=num<100?1:0;
+        return{icon:st[0],label:st[1],unit:st[3],color:st[4],chart:ch,facts:[{k:'Snitt',v:nf(v.reduce((a,b)=>a+b,0)/v.length,d)},{k:'Høyeste',v:nf(Math.max(...v),d)},{k:'Laveste',v:nf(Math.min(...v),d)}]}})(),
+      closeDet:()=>this.setState({detI:null}),
+      progress:(T.progress||[]).map(([label,v,color])=>({label,value:nf(v,2),w:v+'%',color})),
+      showMap:!!T.map,mapSrc:MAP,countries,
+      sel:{name:sc[1],v:k(sc[2]),share:nf(sc[2]/tot*100,1)+' %'},
+      pages:[['/',158],['/en/',5],['/om/',4],['/en/about/',3],['/en/films/',2]].map(([path,v])=>({path,v:k(v),w:v/158*100+'%'})),
+      charts:T.charts,showError:!!T.error,
+      footer:'Cloudflare · '+(T.error?'1 feil':'spørringer ok')+' · oppdateres hvert 30. min'
+    };
+  }
+}
+</script>
+</body>
+</html>
