@@ -3,12 +3,14 @@ package no.kristo.cfanalytics.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 
 private val FallbackDark = darkColorScheme(
     background = Color(0xFF141218),
@@ -47,6 +49,20 @@ object ChartColors {
     val Red = Color(0xFFFFB4AB)
 }
 
+/** Bottom bar pill from the design: #FFD9E2 with a dark filled icon. */
+object NavColors {
+    val Pill = Color(0xFFFFD9E2)
+    val Icon = Color(0xFF3F0020)
+}
+
+private val ExpressiveTypography = Typography().let { t ->
+    t.copy(
+        displayLarge = t.displayLarge.copy(fontWeight = FontWeight.Bold),
+        displayMedium = t.displayMedium.copy(fontWeight = FontWeight.Bold),
+        headlineSmall = t.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
+    )
+}
+
 @Composable
 fun CfTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
@@ -57,5 +73,5 @@ fun CfTheme(content: @Composable () -> Unit) {
         }
         else -> FallbackDark
     }
-    MaterialTheme(colorScheme = scheme, content = content)
+    MaterialTheme(colorScheme = scheme, typography = ExpressiveTypography, content = content)
 }

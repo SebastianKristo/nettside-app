@@ -18,9 +18,15 @@ targets:
       - path: ../shared/queries
         type: folder
         buildPhase: resources
+      - path: ../shared/countries.json
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: no.kristo.cfanalytics
+        # Din Apple Team ID (10 tegn) – Xcode → Settings → Accounts → velg teamet.
+        # Står den her, overlever den `xcodegen generate`.
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Cloudflare Analytics

@@ -67,21 +67,27 @@ struct BarChartView: View {
     }
 }
 
+/// Hourly sparkline: monotone curve (no overshoot below 0), gradient fill, no leading empty hours.
 struct SparklineView: View {
     var points: [Double]
     var color: Color
 
     var body: some View {
-        Chart(Array(points.enumerated()), id: \.offset) { i, v in
+        let trimmed = Array(points.drop { $0 == 0 })
+        let maxValue = max(trimmed.max() ?? 1, 1)
+        Chart(Array(trimmed.enumerated()), id: \.offset) { i, v in
             AreaMark(x: .value("t", i), y: .value("v", v))
-                .foregroundStyle(color.opacity(0.18))
-                .interpolationMethod(.catmullRom)
+                .foregroundStyle(.linearGradient(colors: [color.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom))
+                .interpolationMethod(.monotone)
             LineMark(x: .value("t", i), y: .value("v", v))
                 .foregroundStyle(color)
-                .lineStyle(StrokeStyle(lineWidth: 1.5))
-                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
         }
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
+        .chartLegend(.hidden)
+        .chartYScale(domain: 0...(maxValue * 1.15))
+        .chartPlotStyle { $0.padding(.zero) }
     }
 }

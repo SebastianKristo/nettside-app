@@ -5,7 +5,7 @@ Native apper som viser Cloudflare-analyse for ett eller flere domener.
 ```
 /android   Kotlin, Jetpack Compose, Material 3
 /ios       Swift 6, SwiftUI, iOS 26 (Liquid Glass) – prosjektet genereres med XcodeGen
-/shared    queries/*.graphql (brukes direkte av iOS-appen)
+/shared    queries/*.graphql, countries.json (verdenskart), metrics.md (utregninger)
 /design    designfiler og handoff-beskrivelser
 ```
 
@@ -62,5 +62,5 @@ xcodegen generate
 open CloudflareAnalytics.xcodeproj
 ```
 
-Velg ditt Apple-team under *Signing & Capabilities* og kjør på telefonen (gratis Apple-ID gir 7-dagers signering).
+Legg inn din Team ID i `ios/project.yml` (`DEVELOPMENT_TEAM`) én gang – da overlever den `xcodegen generate` – og kjør på telefonen (gratis Apple-ID gir 7-dagers signering).
 GitHub Actions bygger også en usignert `CloudflareAnalytics-unsigned.ipa` (artefakt `ios-unsigned-ipa`) som kan sideloades med Sideloadly eller AltStore, som signerer den med din Apple-ID.

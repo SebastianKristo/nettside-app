@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "no.kristo.cfanalytics"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "no.kristo.cfanalytics"
@@ -45,15 +45,18 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
+    // countries.json (world map) and the GraphQL queries are shared with the iOS app.
+    sourceSets["main"].assets.srcDir("../../shared")
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val composeBom = platform("androidx.compose:compose-bom:2025.10.00")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.graphics:graphics-shapes:1.0.1")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
 

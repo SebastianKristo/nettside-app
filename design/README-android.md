@@ -2,6 +2,14 @@
 
 Referansedesign: `Cloudflare Analytics.dc.html` (åpne i nettleser, interaktiv). Bygg som native Android-app.
 
+## Stil: Material 3 Expressive
+- `androidx.compose.material3` 1.4+ med `MaterialExpressiveTheme` og `MotionScheme.expressive()` (fjær-animasjoner)
+- Bunnnavigasjon: `ShortNavigationBar` med pill-indikator som strekker seg ved valg, fylt ikon
+- Segmentvalg: connected `ButtonGroup`, valgt knapp morfer til full pill
+- Former: stat-kort med asymmetriske hjørner (MaterialShapes), morf ved trykk; hero-kort i primaryContainer med emphasized display-typografi (Roboto Flex wdth 125, vekt 700)
+- Refresh: `LoadingIndicator` (morfende former) i stedet for spinner
+- Knapper 48dp, seksjonskort 32dp hjørner
+
 ## Stack
 - Kotlin, Jetpack Compose, Material 3 (`androidx.compose.material3`), min SDK 26
 - Dynamic color (Material You) på Android 12+, ellers fallback-tema under
@@ -125,3 +133,10 @@ data class Snapshot(val totals: Totals, val hourly: List<Pair<Instant, Long>>, v
 - Faneskift nullstiller bottom sheet
 - Periodevalg deles mellom fane-historikk og bottom sheet
 - Valgt domene, fane og periode lagres i DataStore
+
+
+## Endringer siden første handoff
+- **Bunnnavigasjon** (erstatter topp-faner): ShortNavigationBar, valgt pill #FFD9E2 med mørkt fylt ikon #3F0020, pill animerer bredde 32→64dp med fjær
+- **Verdenskart (Besøk)**: ekte kart (Natural Earth / world-atlas 110m, equirectangular, Antarktis utelatt). Choropleth: land med trafikk i secondary (#A0CAFD, alpha 0,35–0,85 etter andel), valgt land primary #FFB1C8, øvrige #4A4752, grense 0,3dp i bakgrunnsfarge. Bobler oppå, trykk på land eller boble velger. Bundle GeoJSON i assets (ikke hent fra nett), tegn i Compose Canvas
+- **Domenemeny**: DropdownMenu med 28dp hjørner, overskrift «DOMENER», hver rad: 40dp avatar med forbokstav (ulike MaterialShapes per domene), navn + «N besøk · 24 t», valgt rad primaryContainer #7B2949 med hake, rader morfer hjørner 12→20dp ved trykk. Nederst tonal pill-knapp «Legg til domene»
+- **Range-knapper** («Siste 24 t / I dag»): ikke tekstbryting (maxLines = 1)
