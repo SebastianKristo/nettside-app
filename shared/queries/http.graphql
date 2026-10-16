@@ -1,0 +1,25 @@
+query($zone: String!, $since: Time!, $until: Time!) {
+  viewer { zones(filter: { zoneTag: $zone }) {
+    totals: httpRequestsAdaptiveGroups(limit: 1, filter: { datetime_geq: $since, datetime_lt: $until }) {
+      count sum { edgeResponseBytes visits }
+    }
+    hourly: httpRequestsAdaptiveGroups(limit: 48, orderBy: [datetimeHour_ASC], filter: { datetime_geq: $since, datetime_lt: $until }) {
+      count dimensions { datetimeHour } sum { visits }
+    }
+    countries: httpRequestsAdaptiveGroups(limit: 250, orderBy: [sum_visits_DESC], filter: { datetime_geq: $since, datetime_lt: $until }) {
+      sum { visits } dimensions { clientCountryName }
+    }
+    pages: httpRequestsAdaptiveGroups(limit: 5, orderBy: [count_DESC], filter: { datetime_geq: $since, datetime_lt: $until, requestSource: "eyeball" }) {
+      count dimensions { clientRequestPath }
+    }
+    pageviews: httpRequestsAdaptiveGroups(limit: 1, filter: { datetime_geq: $since, datetime_lt: $until, edgeResponseContentTypeName: "html" }) {
+      count
+    }
+    status: httpRequestsAdaptiveGroups(limit: 100, filter: { datetime_geq: $since, datetime_lt: $until }) {
+      count dimensions { edgeResponseStatus }
+    }
+    cache: httpRequestsAdaptiveGroups(limit: 20, filter: { datetime_geq: $since, datetime_lt: $until }) {
+      count sum { edgeResponseBytes } dimensions { cacheStatus }
+    }
+  } }
+}

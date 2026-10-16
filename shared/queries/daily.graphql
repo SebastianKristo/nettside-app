@@ -1,0 +1,9 @@
+query($zone: String!, $from: Date!, $to: Date!) {
+  viewer { zones(filter: { zoneTag: $zone }) {
+    days: httpRequests1dGroups(limit: 400, orderBy: [date_ASC], filter: { date_geq: $from, date_leq: $to }) {
+      dimensions { date }
+      sum { requests bytes cachedRequests cachedBytes pageViews threats }
+      uniq { uniques }
+    }
+  } }
+}
