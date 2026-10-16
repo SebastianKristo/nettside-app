@@ -9,27 +9,36 @@ settings:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
+    # Din Apple Team ID (10 tegn) – Xcode → Settings → Accounts → velg teamet.
+    # Står den her, overlever den `xcodegen generate`. Gjelder både appen og widgeten.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
 targets:
   CloudflareAnalytics:
     type: application
     platform: iOS
     sources:
       - path: CloudflareAnalytics
+      - path: Shared
       - path: ../shared/queries
         type: folder
         buildPhase: resources
       - path: ../shared/countries.json
         buildPhase: resources
+    dependencies:
+      - target: EdgepulsWidget
+    entitlements:
+      path: CloudflareAnalytics/CloudflareAnalytics.entitlements
+      properties:
+        com.apple.security.application-groups: [group.no.kristo.edgepuls]
+        keychain-access-groups: ["$(AppIdentifierPrefix)no.kristo.edgepuls.shared"]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: no.kristo.cfanalytics
-        # Din Apple Team ID (10 tegn) – Xcode → Settings → Accounts → velg teamet.
-        # Står den her, overlever den `xcodegen generate`.
-        DEVELOPMENT_TEAM: ""
-        CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Cloudflare Analytics
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: Edgepuls
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
@@ -39,3 +48,34 @@ targets:
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [no.kristo.cfanalytics.refresh]
         CFBundleDevelopmentRegion: nb
+        CFBundleURLTypes:
+          - CFBundleURLName: no.kristo.edgepuls
+            CFBundleURLSchemes: [edgepuls]
+
+  EdgepulsWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: EdgepulsWidget
+      - path: Shared
+      - path: ../shared/queries
+        type: folder
+        buildPhase: resources
+    entitlements:
+      path: EdgepulsWidget/EdgepulsWidget.entitlements
+      properties:
+        com.apple.security.application-groups: [group.no.kristo.edgepuls]
+        keychain-access-groups: ["$(AppIdentifierPrefix)no.kristo.edgepuls.shared"]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: no.kristo.cfanalytics.widget
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Edgepuls
+        SKIP_INSTALL: YES
+    info:
+      path: EdgepulsWidget/Info.plist
+      properties:
+        CFBundleDevelopmentRegion: nb
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

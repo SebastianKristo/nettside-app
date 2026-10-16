@@ -18,6 +18,7 @@ import no.kristo.cfanalytics.data.Metric
 import no.kristo.cfanalytics.data.Period
 import no.kristo.cfanalytics.data.Range
 import no.kristo.cfanalytics.data.Snapshot
+import no.kristo.cfanalytics.widget.WidgetData
 import java.time.LocalDate
 
 data class UiState(
@@ -91,6 +92,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 )
             }
             loadDomainVisits()
+            if (result.isSuccess) runCatching { WidgetData.updateAll(getApplication<Application>()) }
             result.onSuccess { if (announce) send(getApplication<Application>().getString(R.string.data_updated)) }
                 .onFailure { send(getApplication<Application>().getString(R.string.update_failed, it.message.orEmpty())) }
         }

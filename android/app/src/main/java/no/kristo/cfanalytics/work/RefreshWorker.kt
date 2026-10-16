@@ -10,9 +10,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import no.kristo.cfanalytics.CfApp
 import no.kristo.cfanalytics.data.Range
+import no.kristo.cfanalytics.widget.WidgetData
 import java.util.concurrent.TimeUnit
 
-/** Every 30 minutes: refresh every domain so the daily history keeps one point per day. */
+/** Every 30 minutes: refresh every domain (one point per day for history) and redraw the widgets. */
 class RefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val repo = (applicationContext as CfApp).repository
@@ -23,6 +24,7 @@ class RefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 repo.refresh(domain, Range.LAST_24H)
             }.onFailure { failed = true }
         }
+        WidgetData.updateAll(applicationContext)
         return if (failed) Result.retry() else Result.success()
     }
 

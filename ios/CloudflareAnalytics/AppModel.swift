@@ -2,6 +2,7 @@ import BackgroundTasks
 import Foundation
 import Observation
 import SwiftData
+import WidgetKit
 
 @MainActor
 @Observable
@@ -78,7 +79,15 @@ final class AppModel {
             upsert(domain.id, PointValue(date: today, metric: m, value: v))
         }
         try? context.save()
+        WidgetCenter.shared.reloadAllTimelines()
         return s
+    }
+
+    /// edgepuls://domain/<zoneId> from a widget tap.
+    func open(_ url: URL) {
+        guard url.scheme == "edgepuls", url.host() == "domain",
+              let d = domains.first(where: { $0.zoneId == url.lastPathComponent }) else { return }
+        select(d)
     }
 
     private func upsert(_ domainId: String, _ p: PointValue) {
@@ -134,6 +143,7 @@ final class AppModel {
         Prefs.domains = domains
         Keychain.delete(domain.id)
         Prefs.removeSnapshots(domain.id)
+        WidgetCenter.shared.reloadAllTimelines()
         let id = domain.id
         try? context.delete(model: DailyPoint.self, where: #Predicate { $0.domainId == id })
         try? context.save()

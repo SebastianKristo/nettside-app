@@ -8,6 +8,7 @@ struct CloudflareAnalyticsApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        Prefs.migrateIfNeeded()
         let container = try! ModelContainer(for: DailyPoint.self)
         self.container = container
         _model = State(initialValue: AppModel(container: container))
@@ -19,6 +20,7 @@ struct CloudflareAnalyticsApp: App {
             ContentView()
                 .environment(model)
                 .preferredColorScheme(.dark)
+                .onOpenURL { model.open($0) }
         }
         .modelContainer(container)
         .onChange(of: scenePhase) { _, phase in

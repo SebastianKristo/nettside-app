@@ -20,7 +20,8 @@ final class DailyPoint {
     }
 }
 
-/// API tokens in the Keychain, one per domain id.
+/// API tokens in the Keychain, one per domain id. New items land in the first keychain-access-group
+/// in the entitlements (shared with the widget), so no explicit access group is needed here.
 enum Keychain {
     private static let service = "no.kristo.cfanalytics.token"
 
@@ -58,9 +59,23 @@ enum Keychain {
     }
 }
 
-/// Small UserDefaults-backed store for the domain list and cached snapshots.
+/// Domain list and cached snapshots, in the App Group so the widget can read them.
 enum Prefs {
-    private static var d: UserDefaults { .standard }
+    static let appGroup = "group.no.kristo.edgepuls"
+    private static var d: UserDefaults { UserDefaults(suiteName: appGroup) ?? .standard }
+
+    /// Moves data saved before the App Group existed, and re-saves tokens into the shared Keychain group.
+    static func migrateIfNeeded() {
+        guard d.data(forKey: "domains") == nil, let old = UserDefaults.standard.data(forKey: "domains") else { return }
+        d.set(old, forKey: "domains")
+        for domain in domains {
+            for r in TimeRange.allCases {
+                let key = "snap.\(domain.id).\(r.rawValue)"
+                if let v = UserDefaults.standard.data(forKey: key) { d.set(v, forKey: key) }
+            }
+            if let token = Keychain.get(domain.id) { Keychain.set(token, for: domain.id) }
+        }
+    }
 
     static var domains: [Domain] {
         get { d.data(forKey: "domains").flatMap { try? JSONDecoder().decode([Domain].self, from: $0) } ?? [] }

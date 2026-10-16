@@ -195,6 +195,14 @@ struct Fetcher: Sendable {
         }
     }
 
+    /// Visits and requests in an arbitrary window (used for «mot i går»).
+    func visits(domain: Domain, token: String, since: Date, until: Date) async throws -> Double {
+        let f = ISO8601DateFormatter()
+        let z = try await api.zoneQuery(token: token, query: CloudflareAPI.query("totals"),
+                                        variables: ["zone": domain.zoneId, "since": f.string(from: since), "until": f.string(from: until)])
+        return z["totals"]?.rows.first?.path("sum", "visits")?.double ?? 0
+    }
+
     func ping(zoneId: String, token: String) async throws {
         let f = ISO8601DateFormatter()
         let now = Date()

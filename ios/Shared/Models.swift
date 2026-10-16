@@ -77,3 +77,23 @@ func isoDay(_ date: Date) -> String {
     let c = cal.dateComponents([.year, .month, .day], from: date)
     return String(format: "%04d-%02d-%02d", c.year!, c.month!, c.day!)
 }
+
+/// Compact nb-NO numbers for widgets: 12,4k · 3,2 mill.
+func compact(_ v: Double) -> String {
+    switch abs(v) {
+    case 1_000_000...: return "\(nf(v / 1_000_000, 1)) mill."
+    case 10_000...: return "\(nf(v / 1_000, 0))k"
+    case 1_000...: return "\(nf(v / 1_000, 1))k"
+    default: return nf(v)
+    }
+}
+
+/// Megabytes as MB or GB: 3,2 GB.
+func compactBytes(mb: Double) -> String {
+    mb >= 1_000 ? "\(nf(mb / 1_000, 1)) GB" : "\(nf(mb, mb < 10 ? 1 : 0)) MB"
+}
+
+/// Flag emoji from an ISO 3166 alpha-2 code.
+func flag(_ code: String) -> String {
+    String(code.uppercased().unicodeScalars.compactMap { UnicodeScalar(127_397 + $0.value) }.map(Character.init))
+}

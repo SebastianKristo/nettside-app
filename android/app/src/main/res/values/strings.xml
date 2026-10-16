@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cloudflare Analytics</string>
+    <string name="app_name">Edgepuls</string>
 
     <string name="tab_traffic">Trafikk</string>
     <string name="tab_visits">Besøk</string>
@@ -83,4 +83,11 @@
     <string name="u_requests">forespørsler</string>
     <string name="u_lookups">oppslag</string>
     <string name="u_none"></string>
+
+    <string name="widget_visits_name">Besøk</string>
+    <string name="widget_visits_desc">Besøk siste 24 timer – bredere gir oversikt med 7 dager</string>
+    <string name="widget_cache_name">Cache-treff</string>
+    <string name="widget_cache_desc">Andel forespørsler fra hurtiglager</string>
+    <string name="widget_empty">Legg til et domene i Edgepuls</string>
+    <string name="widget_pick_domain">Velg domene for widgeten</string>
 </resources>
