@@ -28,3 +28,18 @@ Tokenen testes mot `/user/tokens/verify` og en liten GraphQL-spørring, og lagre
 | `ui/` | Compose-skjermer: hero-kort, faner, stat-kort, bottom sheet, verdenskart, dialoger |
 
 Hver spørring kjøres for seg, så en feil (f.eks. manglende DNS-tilgang) gir «—» på berørte kort, et feilbanner i fanen og «Feil i spørring» på hero-kortet, uten å velte resten.
+
+## Signert release-APK
+
+`release`-jobben i GitHub Actions bygger `app-release.apk` signert med din egen nøkkel. Legg inn disse under
+**Settings → Secrets and variables → Actions**:
+
+| Secret | Innhold |
+|---|---|
+| `KEYSTORE_BASE64` | keystore-filen base64-kodet (`base64 -w0 release.jks`) |
+| `KEYSTORE_PASSWORD` | passord til keystore |
+| `KEY_ALIAS` | nøkkelalias (`cfanalytics`) |
+| `KEY_PASSWORD` | passord til nøkkelen |
+
+Lokalt: `KEYSTORE_PATH=/sti/release.jks KEYSTORE_PASSWORD=… KEY_ALIAS=cfanalytics KEY_PASSWORD=… ./gradlew assembleRelease`.
+Ta vare på keystore-filen – uten den kan ikke nye versjoner installeres som oppdatering. Den skal aldri sjekkes inn.
