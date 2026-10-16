@@ -1,13 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 
 package no.kristo.cfanalytics.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,19 +34,29 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.ShortNavigationBarItemDefaults
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.toShape
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.ui.graphics.Shape
+import no.kristo.cfanalytics.ui.theme.NavColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -69,7 +73,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -111,14 +114,18 @@ fun AppScreen(vm: MainViewModel = viewModel()) {
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+            ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                 TABS.forEachIndexed { i, tab ->
                     val selected = state.tab == i
-                    NavigationBarItem(
+                    ShortNavigationBarItem(
                         selected = selected,
                         onClick = { vm.selectTab(i) },
                         icon = { Icon(if (selected) tab.iconSelected else tab.icon, null) },
                         label = { Text(stringResource(tab.title), fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) },
+                        colors = ShortNavigationBarItemDefaults.colors(
+                            selectedIndicatorColor = NavColors.Pill,
+                            selectedIconColor = NavColors.Icon,
+                        ),
                     )
                 }
             }
@@ -182,36 +189,88 @@ private fun DomainPicker(state: UiState, onPick: (no.kristo.cfanalytics.data.Dom
             colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
             modifier = Modifier.height(40.dp),
         )
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            state.domains.forEach { d ->
-                val sel = d.id == state.selected?.id
-                DropdownMenuItem(
-                    text = { Text(d.name) },
-                    leadingIcon = { Icon(if (sel) Icons.Rounded.Check else Icons.Rounded.Language, null) },
+        DropdownMenu(
+            expanded = open,
+            onDismissRequest = { open = false },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.width(300.dp),
+        ) {
+            Text(
+                "DOMENER", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 8.dp),
+            )
+            state.domains.forEachIndexed { i, d ->
+                DomainRow(
+                    name = d.name,
+                    visits = state.domainVisits[d.id],
+                    shape = AVATAR_SHAPES[i % AVATAR_SHAPES.size],
+                    selected = d.id == state.selected?.id,
                     onClick = { open = false; onPick(d) },
-                    modifier = if (sel) Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest) else Modifier,
                 )
             }
-            if (state.domains.isNotEmpty()) HorizontalDivider(Modifier.padding(vertical = 8.dp))
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.add_domain)) },
-                leadingIcon = { Icon(Icons.Rounded.Add, null, tint = MaterialTheme.colorScheme.primary) },
+            FilledTonalButton(
                 onClick = { open = false; onAdd() },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).height(48.dp),
+            ) {
+                Icon(Icons.Rounded.Add, null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.add_domain))
+            }
+        }
+    }
+}
+
+private val AVATAR_SHAPES = listOf(
+    MaterialShapes.Cookie9Sided, MaterialShapes.Clover4Leaf, MaterialShapes.Sunny,
+    MaterialShapes.Pill, MaterialShapes.Gem, MaterialShapes.Arch,
+)
+
+@Composable
+private fun DomainRow(
+    name: String,
+    visits: Double?,
+    shape: androidx.graphics.shapes.RoundedPolygon,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val corner by animateDpAsState(if (pressed) 20.dp else 12.dp, label = "corner")
+    val container = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(corner))
+            .background(container)
+            .clickable(interactionSource = interaction, indication = androidx.compose.material3.ripple(), onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            Modifier.size(40.dp).clip(shape.toShape()).background(MaterialTheme.colorScheme.tertiaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(name.take(1).uppercase(), color = MaterialTheme.colorScheme.onTertiaryContainer, fontWeight = FontWeight.Bold)
+        }
+        Column(Modifier.weight(1f)) {
+            Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
+            Text(
+                "${visits?.let { nf(it) } ?: "—"} besøk · 24 t", fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        if (selected) Icon(Icons.Rounded.Check, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 }
 
 @Composable
 private fun RefreshButton(loading: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    val transition = rememberInfiniteTransition(label = "spin")
-    val angle by transition.animateFloat(
-        initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(800, easing = LinearEasing), RepeatMode.Restart),
-        label = "angle",
-    )
-    IconButton(onClick = onClick, enabled = enabled && !loading) {
-        Icon(Icons.Rounded.Refresh, null, Modifier.rotate(if (loading) angle else 0f))
+    IconButton(onClick = onClick, enabled = enabled && !loading, modifier = Modifier.size(48.dp)) {
+        if (loading) LoadingIndicator(Modifier.size(32.dp)) else Icon(Icons.Rounded.Refresh, null)
     }
 }
 
@@ -242,8 +301,9 @@ fun Snapshot?.text(metric: Metric, decimals: Int = metric.decimals): String =
 @Composable
 private fun HeroCard(snapshot: Snapshot?, range: Range) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(32.dp),
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
     ) {
         Column {
@@ -252,7 +312,7 @@ private fun HeroCard(snapshot: Snapshot?, range: Range) {
                     Box(Modifier.size(8.dp).clip(CircleShape).background(ChartColors.Green))
                     Text(
                         stringResource(if (range == Range.TODAY) R.string.hero_live_today else R.string.hero_live_24h),
-                        fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                         modifier = Modifier.weight(1f),
                     )
                     if ((snapshot?.failedQueries ?: 0) > 0) {
@@ -285,9 +345,9 @@ private fun HeroValue(value: String, label: String, big: Boolean = false) {
         Text(
             value,
             style = if (big) MaterialTheme.typography.displayLarge else MaterialTheme.typography.headlineSmall,
-            fontWeight = if (big) FontWeight.Light else FontWeight.Normal,
+            fontWeight = if (big) FontWeight.Bold else FontWeight.Medium,
         )
-        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f))
     }
 }
 
@@ -298,15 +358,12 @@ private fun TabContent(state: UiState, vm: MainViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(tab.title), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-            SingleChoiceSegmentedButtonRow {
-                Range.entries.forEachIndexed { i, r ->
-                    SegmentedButton(
-                        selected = state.range == r,
-                        onClick = { vm.selectRange(r) },
-                        shape = SegmentedButtonDefaults.itemShape(i, Range.entries.size),
-                    ) { Text(stringResource(if (r == Range.TODAY) R.string.range_today else R.string.range_24h), fontSize = 13.sp) }
-                }
-            }
+            ConnectedGroup(
+                items = Range.entries,
+                selected = state.range,
+                onSelect = vm::selectRange,
+                label = { stringResource(if (it == Range.TODAY) R.string.range_today else R.string.range_24h) },
+            )
         }
 
         tab.stats.chunked(2).forEach { row ->
@@ -336,10 +393,17 @@ private fun TabContent(state: UiState, vm: MainViewModel) {
 
 @Composable
 private fun StatCard(spec: StatSpec, snap: Snapshot?, modifier: Modifier, onClick: () -> Unit) {
+    // Asymmetric corners that even out while pressed.
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val big by animateDpAsState(if (pressed) 20.dp else 28.dp, label = "big")
+    val small by animateDpAsState(if (pressed) 20.dp else 8.dp, label = "small")
+    val shape: Shape = RoundedCornerShape(topStart = big, topEnd = small, bottomEnd = big, bottomStart = small)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = RoundedCornerShape(16.dp),
+        shape = shape,
         onClick = onClick,
+        interactionSource = interaction,
         modifier = modifier,
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -384,7 +448,7 @@ private fun ProgressCard(spec: ProgressSpec, snap: Snapshot?) {
 @Composable
 private fun CountriesCard(snap: Snapshot, selected: Int, onSelect: (Int) -> Unit) {
     val countries = snap.countries
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(24.dp)) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(32.dp)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.map_title), fontSize = 16.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
@@ -392,8 +456,10 @@ private fun CountriesCard(snap: Snapshot, selected: Int, onSelect: (Int) -> Unit
             }
             WorldMap(
                 countries, selected, onSelect,
-                dotColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.9f),
+                land = Color(0xFF4A4752),
+                traffic = MaterialTheme.colorScheme.secondary,
                 accent = MaterialTheme.colorScheme.primary,
+                border = MaterialTheme.colorScheme.surfaceContainer,
             )
             countries.getOrNull(selected)?.let { c ->
                 val total = snap.values[Metric.VISITS]?.takeIf { it > 0 } ?: countries.sumOf { it.visits }.toDouble().coerceAtLeast(1.0)
@@ -427,7 +493,7 @@ private fun CountriesCard(snap: Snapshot, selected: Int, onSelect: (Int) -> Unit
 private fun PagesCard(snap: Snapshot) {
     if (snap.pages.isEmpty()) return
     val max = snap.pages.maxOf { it.count }.coerceAtLeast(1L)
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(24.dp)) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(32.dp)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.top_pages), fontSize = 16.sp, fontWeight = FontWeight.Medium)
             snap.pages.forEach { p -> BarRow(p.path, p.count, max, MaterialTheme.colorScheme.primary, labelWidth = 96, mono = true) }
@@ -457,13 +523,38 @@ private fun BarRow(label: String, value: Long, max: Long, color: Color, labelWid
 @Composable
 fun PeriodSelector(period: Period, onSelect: (Period) -> Unit) {
     val labels = mapOf(Period.D7 to "7 d", Period.D30 to "30 d", Period.D90 to "90 d", Period.Y1 to "1 år")
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-        Period.entries.forEachIndexed { i, p ->
-            SegmentedButton(
-                selected = period == p,
-                onClick = { onSelect(p) },
-                shape = SegmentedButtonDefaults.itemShape(i, Period.entries.size),
-            ) { Text(labels.getValue(p)) }
+    ConnectedGroup(Period.entries, period, onSelect, { labels.getValue(it) }, Modifier.fillMaxWidth(), fill = true)
+}
+
+/** Connected button group: the selected button morphs into a full pill. Labels never wrap. */
+@Composable
+fun <T> ConnectedGroup(
+    items: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: @Composable (T) -> String,
+    modifier: Modifier = Modifier,
+    fill: Boolean = false,
+) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+        items.forEachIndexed { i, item ->
+            val checked = item == selected
+            ToggleButton(
+                checked = checked,
+                onCheckedChange = { onSelect(item) },
+                shapes = when (i) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    items.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+                modifier = if (fill) Modifier.weight(1f) else Modifier,
+            ) {
+                if (checked) {
+                    Icon(Icons.Rounded.Check, null, Modifier.size(ToggleButtonDefaults.IconSize))
+                    Spacer(Modifier.width(4.dp))
+                }
+                Text(label(item), maxLines = 1, softWrap = false)
+            }
         }
     }
 }
@@ -473,7 +564,7 @@ private fun HistoryCard(spec: StatSpec, history: Map<Metric, Map<java.time.Local
     val chart = remember(history, period, spec.metric) { buildChart(seriesFor(history, spec.metric), spec.metric, period) }
     val unit = spec.unitText ?: stringResource(spec.unit)
     val d = spec.metric.decimals
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(24.dp)) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(32.dp)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(stringResource(spec.label), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))

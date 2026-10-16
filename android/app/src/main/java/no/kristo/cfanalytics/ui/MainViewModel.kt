@@ -32,6 +32,8 @@ data class UiState(
     val loading: Boolean = false,
     val detail: Metric? = null,
     val selectedCountry: Int = 0,
+    /** Visits last 24 h per domain id, from cache (shown in the domain menu). */
+    val domainVisits: Map<String, Double> = emptyMap(),
 )
 
 data class AddState(val open: Boolean = false, val busy: Boolean = false, val error: String? = null)
@@ -59,6 +61,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     it.copy(ready = true, domains = p.domains, selected = selected, tab = p.tab, range = p.range, period = p.period)
                 }
                 if (!before.ready || before.selected?.id != selected?.id || before.range != p.range) load(network = true)
+                if (before.domains != p.domains) loadDomainVisits()
             }
         }
     }
@@ -87,9 +90,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     loading = false,
                 )
             }
+            loadDomainVisits()
             result.onSuccess { if (announce) send(getApplication<Application>().getString(R.string.data_updated)) }
                 .onFailure { send(getApplication<Application>().getString(R.string.update_failed, it.message.orEmpty())) }
         }
+    }
+
+    private fun loadDomainVisits() = viewModelScope.launch {
+        val visits = _state.value.domains.mapNotNull { d ->
+            repo.cachedSnapshot(d.id, Range.LAST_24H)?.values?.get(Metric.VISITS)?.let { d.id to it }
+        }.toMap()
+        _state.update { it.copy(domainVisits = visits) }
     }
 
     private fun send(msg: String) { _messages.trySend(msg) }

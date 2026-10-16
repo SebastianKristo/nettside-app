@@ -6,7 +6,7 @@
 <script src="./support.js"></script>
 </head>
 <body>
-<x-dc><helmet><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,400,0..1&amp;display=block" rel="stylesheet"><style>body{margin:0;background:#050508;font-family:-apple-system,'SF Pro Text','Helvetica Neue',system-ui,sans-serif;color:#fff}a{color:#ff8fc0}a:hover{color:#ffc2dc}*::-webkit-scrollbar{display:none}@keyframes spin{to{transform:rotate(360deg)}}</style></helmet>
+<x-dc><helmet><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,400,0..1&amp;display=block" rel="stylesheet"><style>body{margin:0;background:#050508;font-family:-apple-system,'SF Pro Text','Helvetica Neue',system-ui,sans-serif;color:#fff}a{color:#ff8fc0}a:hover{color:#ffc2dc}*::-webkit-scrollbar{display:none}@keyframes spin{to{transform:rotate(360deg)}}</style><script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script><script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script><script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script></helmet>
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;box-sizing:border-box">
 <div style="width:393px;height:852px;border-radius:55px;border:10px solid #1c1c1f;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 2px #3a3a3e;overflow:hidden;position:relative;background:#0a0a12">
   <div style="position:absolute;inset:0;background:radial-gradient(circle at 15% 10%,#ff4f9a 0,transparent 42%),radial-gradient(circle at 90% 30%,#3d7bff 0,transparent 45%),radial-gradient(circle at 30% 75%,#7a3dff 0,transparent 45%),radial-gradient(circle at 85% 95%,#ff9a3d 0,transparent 40%);opacity:{{ bgOpacity }};transition:opacity .4s"></div>
@@ -49,7 +49,7 @@
       <sc-if value="{{ showMap }}" hint-placeholder-val="{{ false }}">
         <div style="border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.04) 45%,rgba(255,255,255,.1));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 -1px 1px rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.25)">
           <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:600">Besøk per land</span><span style="font-size:12px;color:rgba(255,255,255,.65)">Trykk på et land</span></div>
-          <div style="position:relative;width:100%;aspect-ratio:64/26"><img src="{{ mapSrc }}" style="position:absolute;inset:0;width:100%;height:100%;filter:brightness(2.2)"></img>
+          <div style="position:relative;width:100%;aspect-ratio:360/138"><div ref="{{ mapRef }}" style="position:absolute;inset:0"></div>
             <sc-for list="{{ countries }}" as="c" hint-placeholder-count="5"><div onClick="{{ c.pick }}" style="position:absolute;left:{{ c.x }};top:{{ c.y }};width:{{ c.size }};height:{{ c.size }};transform:translate(-50%,-50%);border-radius:50%;background:{{ c.fill }};border:1.5px solid #fff;cursor:pointer;box-sizing:border-box;box-shadow:0 0 12px rgba(255,111,168,.8)"></div></sc-for>
           </div>
           <div style="display:flex;align-items:center;gap:10px;border-radius:16px;padding:10px 14px;background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05));backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 1px rgba(255,255,255,.4)"><span style="font-family:'Material Symbols Rounded';font-size:22px">location_on</span><div style="flex:1;display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">{{ sel.name }}</span><span style="font-size:12px;color:rgba(255,255,255,.7)">{{ sel.share }} av all trafikk</span></div><span style="font-size:22px;font-weight:600">{{ sel.v }}</span></div>
@@ -126,6 +126,7 @@ const LAND=[[[14,20],[22,28],[50,56]],[[10,20],[22,29],[44,58]],[[3,20],[23,28],
 let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 26">';
 LAND.forEach((row,r)=>row.forEach(([a,b])=>{for(let c=a;c<=b;c++)svg+=`<circle cx="${c+.5}" cy="${r+.5}" r=".32" fill="#5b5763"/>`}));
 const MAP='data:image/svg+xml,'+encodeURIComponent(svg+'</svg>');
+const ISO={US:'840',AU:'036',KR:'410',FR:'250',NO:'578'};
 const CTRY=[['US','USA',618,39,-98],['AU','Australia',546,-25,134],['KR','Sør-Korea',520,36,128],['FR','Frankrike',318,46,2],['NO','Norge',292,61,9]];
 const nf=(v,d=0)=>Number(v).toLocaleString('nb-NO',{minimumFractionDigits:d,maximumFractionDigits:d});
 const rnd=s=>()=>((s=Math.imul(s^s>>>15,1|s)+0x6d2b79f5|0)>>>0)%1000/1000;
@@ -133,6 +134,18 @@ const DOMS=[['arildkristo.com',1],['foto.arildkristo.com',.42],['kristo.no',2.3]
 const TABS=['Trafikk','Besøk','Ytelse','Sikkerhet'];
 const PER=[['7 d',7],['30 d',30],['90 d',45],['1 år',52]];
 class Component extends DCLogic {
+  mapRef=React.createRef();
+  componentDidMount(){this.drawMap()}
+  componentDidUpdate(){this.drawMap()}
+  async drawMap(){const el=this.mapRef.current;if(!el)return;
+    if(!window.__world){window.__world=window.__world||fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json())}
+    const w=await window.__world;if(!window.d3?.geoEquirectangular||!window.topojson)return setTimeout(()=>this.drawMap(),300);
+    if(!el.__svg){const p=d3.geoEquirectangular().scale(360/(2*Math.PI)).translate([180,78]),g=d3.geoPath(p);
+      const fs=topojson.feature(w,w.objects.countries).features.filter(f=>f.id!=='010');
+      el.innerHTML='<svg viewBox="0 0 360 138" style="width:100%;height:100%;display:block">'+fs.map(f=>'<path data-id="'+f.id+'" d="'+g(f)+'" stroke="rgba(255,255,255,.35)" stroke-width=".3"/>').join('')+'</svg>';el.__svg=1}
+    const sel=ISO[CTRY[this.state.sel][0]];
+    el.querySelectorAll('path').forEach(pt=>{const id=pt.dataset.id,c=Object.keys(ISO).find(k=>ISO[k]===id);const v=c?CTRY.find(x=>x[0]===c)[2]/CTRY[0][2]:0;
+      pt.setAttribute('fill',id===sel?'#ff4f9a':c?'rgba(255,79,154,'+(0.35+v*.5)+')':'rgba(255,255,255,.18)')})}
   barRef=React.createRef();
   relX(e){const r=this.barRef.current.getBoundingClientRect();return Math.min(Math.max((e.clientX-r.left)/r.width,0),1)}
   state={drag:null,bgOn:true,set:false,detI:null,doms:DOMS,add:false,fDomain:'',fZone:'',fToken:'',fErr:'',snackText:'',tab:0,dom:0,range:0,per:1,menu:false,sel:0,spin:false,snack:false};
@@ -189,7 +202,7 @@ class Component extends DCLogic {
         return{icon:st[0],label:st[1],unit:st[3],color:st[4],chart:ch,facts:[{k:'Snitt',v:nf(v.reduce((a,b)=>a+b,0)/v.length,d)},{k:'Høyeste',v:nf(Math.max(...v),d)},{k:'Laveste',v:nf(Math.min(...v),d)}]}})(),
       closeDet:()=>this.setState({detI:null}),
       progress:(T.progress||[]).map(([label,v,color])=>({label,value:nf(v,2),w:v+'%',color})),
-      showMap:!!T.map,mapSrc:MAP,countries,
+      showMap:!!T.map,mapRef:this.mapRef,mapSrc:MAP,countries,
       sel:{name:sc[1],v:k(sc[2]),share:nf(sc[2]/tot*100,1)+' %'},
       pages:[['/',158],['/en/',5],['/om/',4],['/en/about/',3],['/en/films/',2]].map(([path,v])=>({path,v:k(v),w:v/158*100+'%'})),
       charts:T.charts,showError:!!T.error,

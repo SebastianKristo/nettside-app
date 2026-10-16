@@ -62,28 +62,30 @@ struct HeroCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
-                Circle().fill(Palette.green).frame(width: 8, height: 8)
-                Text(range == .today ? "Live · i dag" : "Live · siste 24 timer").font(.footnote).foregroundStyle(.secondary)
-                Spacer()
-                if (snapshot?.failedQueries ?? 0) > 0 {
-                    Text("Feil i spørring").font(.caption).padding(.horizontal, 8).padding(.vertical, 4)
-                        .glassEffect(.regular.tint(.red.opacity(0.5)), in: .capsule)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Circle().fill(Palette.green).frame(width: 8, height: 8)
+                    Text(range == .today ? "Live · i dag" : "Live · siste 24 timer").font(.footnote).foregroundStyle(.secondary)
+                    Spacer()
+                    if (snapshot?.failedQueries ?? 0) > 0 {
+                        Text("Feil i spørring").font(.caption).padding(.horizontal, 8).padding(.vertical, 4)
+                            .glassEffect(.regular.tint(.red.opacity(0.5)), in: .capsule)
+                    }
                 }
+                HStack(alignment: .lastTextBaseline, spacing: 20) {
+                    value(snapshot?.text(.visits) ?? "—", "besøk", big: true)
+                    value(snapshot?.text(.requests) ?? "—", "forespørsler")
+                    value(snapshot?.text(.bytesMB, decimals: 0) ?? "—", "MB")
+                }
+                .padding(.top, 4)
             }
-            HStack(alignment: .lastTextBaseline, spacing: 20) {
-                value(snapshot?.text(.visits) ?? "—", "besøk", big: true)
-                value(snapshot?.text(.requests) ?? "—", "forespørsler")
-                value(snapshot?.text(.bytesMB, decimals: 0) ?? "—", "MB")
-            }
-            .padding(.top, 4)
+            .padding(.horizontal, 18)
             SparklineView(points: snapshot?.hourly ?? [], color: Palette.pink)
                 .frame(height: 72)
-                .padding(.horizontal, -20)
                 .padding(.top, 8)
         }
-        .padding([.horizontal, .top], 20)
-        .clipped()
+        .padding(.top, 18)
+        .clipShape(.rect(cornerRadius: 28))
         .glassCard(28)
     }
 
@@ -158,7 +160,7 @@ struct CountriesCard: View {
                 Spacer()
                 Text("Trykk på et land").font(.caption).foregroundStyle(.secondary)
             }
-            WorldMapView(countries: countries, selected: $selected, accent: Palette.pink)
+            WorldMapView(countries: countries, selected: $selected, accent: Palette.accent)
             if countries.indices.contains(selected) {
                 let c = countries[selected]
                 let total = max(snapshot.values[.visits] ?? countries.reduce(0) { $0 + $1.visits }, 1)
