@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package no.kristo.cfanalytics.ui
 
@@ -34,18 +34,8 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.ShortNavigationBar
-import androidx.compose.material3.ShortNavigationBarItem
-import androidx.compose.material3.ShortNavigationBarItemDefaults
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
-import androidx.compose.material3.toShape
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -56,6 +46,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -114,16 +107,16 @@ fun AppScreen(vm: MainViewModel = viewModel()) {
             )
         },
         bottomBar = {
-            ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                 TABS.forEachIndexed { i, tab ->
                     val selected = state.tab == i
-                    ShortNavigationBarItem(
+                    NavigationBarItem(
                         selected = selected,
                         onClick = { vm.selectTab(i) },
                         icon = { Icon(if (selected) tab.iconSelected else tab.icon, null) },
                         label = { Text(stringResource(tab.title), fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) },
-                        colors = ShortNavigationBarItemDefaults.colors(
-                            selectedIndicatorColor = NavColors.Pill,
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = NavColors.Pill,
                             selectedIconColor = NavColors.Icon,
                         ),
                     )
@@ -222,16 +215,11 @@ private fun DomainPicker(state: UiState, onPick: (no.kristo.cfanalytics.data.Dom
     }
 }
 
-private val AVATAR_SHAPES = listOf(
-    MaterialShapes.Cookie9Sided, MaterialShapes.Clover4Leaf, MaterialShapes.Sunny,
-    MaterialShapes.Pill, MaterialShapes.Gem, MaterialShapes.Arch,
-)
-
 @Composable
 private fun DomainRow(
     name: String,
     visits: Double?,
-    shape: androidx.graphics.shapes.RoundedPolygon,
+    shape: Shape,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
@@ -251,7 +239,7 @@ private fun DomainRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(
-            Modifier.size(40.dp).clip(shape.toShape()).background(MaterialTheme.colorScheme.tertiaryContainer),
+            Modifier.size(40.dp).clip(shape).background(MaterialTheme.colorScheme.tertiaryContainer),
             contentAlignment = Alignment.Center,
         ) {
             Text(name.take(1).uppercase(), color = MaterialTheme.colorScheme.onTertiaryContainer, fontWeight = FontWeight.Bold)
@@ -270,7 +258,7 @@ private fun DomainRow(
 @Composable
 private fun RefreshButton(loading: Boolean, enabled: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick, enabled = enabled && !loading, modifier = Modifier.size(48.dp)) {
-        if (loading) LoadingIndicator(Modifier.size(32.dp)) else Icon(Icons.Rounded.Refresh, null)
+        if (loading) MorphingLoadingIndicator(Modifier.size(28.dp)) else Icon(Icons.Rounded.Refresh, null)
     }
 }
 
@@ -524,39 +512,6 @@ private fun BarRow(label: String, value: Long, max: Long, color: Color, labelWid
 fun PeriodSelector(period: Period, onSelect: (Period) -> Unit) {
     val labels = mapOf(Period.D7 to "7 d", Period.D30 to "30 d", Period.D90 to "90 d", Period.Y1 to "1 år")
     ConnectedGroup(Period.entries, period, onSelect, { labels.getValue(it) }, Modifier.fillMaxWidth(), fill = true)
-}
-
-/** Connected button group: the selected button morphs into a full pill. Labels never wrap. */
-@Composable
-fun <T> ConnectedGroup(
-    items: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    label: @Composable (T) -> String,
-    modifier: Modifier = Modifier,
-    fill: Boolean = false,
-) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        items.forEachIndexed { i, item ->
-            val checked = item == selected
-            ToggleButton(
-                checked = checked,
-                onCheckedChange = { onSelect(item) },
-                shapes = when (i) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    items.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-                modifier = if (fill) Modifier.weight(1f) else Modifier,
-            ) {
-                if (checked) {
-                    Icon(Icons.Rounded.Check, null, Modifier.size(ToggleButtonDefaults.IconSize))
-                    Spacer(Modifier.width(4.dp))
-                }
-                Text(label(item), maxLines = 1, softWrap = false)
-            }
-        }
-    }
 }
 
 @Composable
