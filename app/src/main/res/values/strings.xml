@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cloudflare Analytics</string>
+
+    <string name="tab_traffic">Trafikk</string>
+    <string name="tab_visits">Besøk</string>
+    <string name="tab_performance">Ytelse</string>
+    <string name="tab_security">Sikkerhet</string>
+
+    <string name="range_24h">Siste 24 t</string>
+    <string name="range_today">I dag</string>
+    <string name="hero_live_24h">Live · siste 24 timer</string>
+    <string name="hero_live_today">Live · i dag</string>
+    <string name="hero_visits">besøk</string>
+    <string name="hero_requests">forespørsler</string>
+    <string name="hero_query_error">Feil i spørring</string>
+
+    <string name="history">Historikk</string>
+    <string name="today">I dag</string>
+    <string name="avg_per_day">snitt %1$s / dag</string>
+    <string name="max_value">maks %1$s</string>
+    <string name="total_suffix">%1$s totalt</string>
+    <string name="fact_avg">Snitt</string>
+    <string name="fact_max">Høyeste</string>
+    <string name="fact_min">Laveste</string>
+    <string name="no_history">Ingen historikk ennå – ett punkt lagres per dag.</string>
+
+    <string name="footer_ok">Cloudflare · spørringer ok · oppdateres hvert 30. min</string>
+    <string name="footer_errors">Cloudflare · %1$d ok · %2$d feil · oppdateres hvert 30. min</string>
+    <string name="data_updated">Data oppdatert fra Cloudflare</string>
+    <string name="update_failed">Kunne ikke oppdatere: %1$s</string>
+    <string name="domain_added">%1$s lagt til</string>
+    <string name="domain_removed">%1$s fjernet</string>
+
+    <string name="map_title">Besøk per land</string>
+    <string name="map_hint">Trykk på et land</string>
+    <string name="share_of_traffic">%1$s av all trafikk</string>
+    <string name="top_pages">Mest besøkte sider</string>
+
+    <string name="add_domain">Legg til domene</string>
+    <string name="add_domain_info">Hvert domene bruker sin egen Cloudflare API-token med tilgang til Analytics (lesetilgang).</string>
+    <string name="field_domain">Domene</string>
+    <string name="field_zone">Zone ID</string>
+    <string name="field_token">API-token</string>
+    <string name="err_domain">Ugyldig domenenavn</string>
+    <string name="err_zone">Zone ID må være 32 heksadesimale tegn</string>
+    <string name="err_token">Mangler API-token</string>
+    <string name="cancel">Avbryt</string>
+    <string name="add">Legg til</string>
+    <string name="verifying">Tester token…</string>
+
+    <string name="settings">Innstillinger</string>
+    <string name="settings_domains">Domener</string>
+    <string name="remove">Fjern</string>
+    <string name="close">Lukk</string>
+
+    <string name="empty_title">Ingen domener ennå</string>
+    <string name="empty_body">Legg til et domene med Zone ID og en API-token med Analytics: Read for å komme i gang.</string>
+    <string name="error_banner">Feil i spørring: %1$s. Sjekk API-tilgangen i Cloudflare.</string>
+    <string name="m_visits">Besøk</string>
+    <string name="m_requests">Forespørsler</string>
+    <string name="m_bytes">Dataoverføring</string>
+    <string name="m_countries">Land</string>
+    <string name="m_pageviews">Sidevisninger</string>
+    <string name="m_uniques">Unike besøkende</string>
+    <string name="m_p50">Svartid p50</string>
+    <string name="m_p95">Svartid p95</string>
+    <string name="m_4xx">4xx-andel</string>
+    <string name="m_5xx">5xx-andel</string>
+    <string name="m_cached">Fra hurtiglager</string>
+    <string name="m_cached_mb">Data fra hurtiglager</string>
+    <string name="m_hit">Hurtiglager-treffrate</string>
+    <string name="m_hit_short">Treffrate</string>
+    <string name="m_saved">Båndbredde spart</string>
+    <string name="m_dns">DNS-oppslag</string>
+    <string name="m_blocked">Stoppede forespørsler</string>
+    <string name="m_blocked_short">Stoppede</string>
+    <string name="m_nx">NXDOMAIN-andel</string>
+
+    <string name="u_visits">besøk</string>
+    <string name="u_views">visninger</string>
+    <string name="u_visitors">besøkende</string>
+    <string name="u_requests">forespørsler</string>
+    <string name="u_lookups">oppslag</string>
+    <string name="u_none"></string>
+</resources>
