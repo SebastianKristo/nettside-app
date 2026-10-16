@@ -1,0 +1,7 @@
+query($zone: String!, $since: Time!, $until: Time!) {
+  viewer { zones(filter: { zoneTag: $zone }) {
+    perf: httpRequestsAdaptiveGroups(limit: 1, filter: { datetime_geq: $since, datetime_lt: $until }) {
+      quantiles { edgeTimeToFirstByteMsP50 edgeTimeToFirstByteMsP95 }
+    }
+  } }
+}

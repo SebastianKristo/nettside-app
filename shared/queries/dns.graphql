@@ -1,0 +1,7 @@
+query($zone: String!, $since: Time!, $until: Time!) {
+  viewer { zones(filter: { zoneTag: $zone }) {
+    dns: dnsAnalyticsAdaptiveGroups(limit: 20, filter: { datetime_geq: $since, datetime_lt: $until }) {
+      count dimensions { responseCode }
+    }
+  } }
+}

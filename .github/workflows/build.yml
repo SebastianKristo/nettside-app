@@ -1,11 +1,15 @@
-name: Android build
+name: Build
 on:
   push:
   pull_request:
   workflow_dispatch:
 jobs:
   build:
+    name: Android debug
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -17,9 +21,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
 
   release:
+    name: Android release
+    defaults:
+      run:
+        working-directory: android
     # Needs the KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD secrets.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -46,4 +54,32 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+  ios:
+    name: iOS
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build (unsigned)
+        run: |
+          xcodebuild -project CloudflareAnalytics.xcodeproj -scheme CloudflareAnalytics \
+            -configuration Release -sdk iphoneos -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build | tail -50
+          test ${PIPESTATUS[0]} -eq 0
+      - name: Package .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/CloudflareAnalytics.app Payload/
+          zip -qr CloudflareAnalytics-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa
+          path: ios/CloudflareAnalytics-unsigned.ipa

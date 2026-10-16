@@ -1,0 +1,5 @@
+query($zone: String!, $since: Time!, $until: Time!) {
+  viewer { zones(filter: { zoneTag: $zone }) {
+    httpRequestsAdaptiveGroups(limit: 1, filter: { datetime_geq: $since, datetime_lt: $until }) { count }
+  } }
+}
