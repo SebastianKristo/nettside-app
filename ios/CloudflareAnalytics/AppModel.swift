@@ -6,7 +6,7 @@ import SwiftData
 @MainActor
 @Observable
 final class AppModel {
-    static let refreshTaskId = "no.kristo.cfanalytics.refresh"
+    nonisolated static let refreshTaskId = "no.kristo.cfanalytics.refresh"
 
     var domains: [Domain] = Prefs.domains
     var selectedId: String? = UserDefaults.standard.string(forKey: "selectedDomain") {

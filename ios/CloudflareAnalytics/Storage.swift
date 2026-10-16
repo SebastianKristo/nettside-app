@@ -60,7 +60,7 @@ enum Keychain {
 
 /// Small UserDefaults-backed store for the domain list and cached snapshots.
 enum Prefs {
-    private static let d = UserDefaults.standard
+    private static var d: UserDefaults { .standard }
 
     static var domains: [Domain] {
         get { d.data(forKey: "domains").flatMap { try? JSONDecoder().decode([Domain].self, from: $0) } ?? [] }
